@@ -1,0 +1,17 @@
+{
+  "name": "jsoncrawler",
+  "type": "module",
+  "version": "0.1.0",
+  "description": "jsoncrawler.js lets you search complex json data",
+  "main": "jsoncrawler.js",
+  "scripts": {
+    "test": "node test.js"
+  },
+  "keywords": [
+    "jsoncrawler",
+    "json",
+    "search"
+  ],
+  "author": "Baksa Gimm",
+  "license": "ISC"
+}
