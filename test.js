@@ -1,16 +1,47 @@
 import {jsonCrawler} from './jsoncrawler.js';
 
+let obj = {
+    artist: "DIA",
+    tracks: [
+        "Paradise",
+        {
+            hidden: "Come On Down"
+        }
+    ]
+};
+let result = jsonCrawler(obj, ["Come On Down", "DIA"]);
+console.log(result);
+
+let ComeOnDown = obj;
+result[1].path.map(p => {
+    ComeOnDown = ComeOnDown[p];
+});
+ComeOnDown = ComeOnDown[result[1].key];
+
+let DIA = obj;
+result[0].path.map(p => {
+    DIA = DIA[p];
+});
+DIA = DIA[result[0].key];
+
+console.log({ComeOnDown, DIA});
+
+let replace = ['Linux', 'Ubuntu', ['Mint', {mini: ['Lubuntu', 'linux']}]];
+jsonCrawler(replace, ['Lubuntu', 'Linux'], {
+    replace: ['Xubuntu', 'Linus'],
+    filter: ['mini']
+});
+console.log(JSON.stringify(replace));
+
 let jsonData = {
-    year: 3000,
     singer: {
-        female: ['DIA', 'UNE', 'Aimyon'],
-        male: ['No Rome', 'Sankanaction', 'Dean']
+        female: ['DIA', 'UNE'],
+        male: ['Joji', 'Sankanaction']
     },
     track: [
         {
             title: 'Paradise',
             artist: 'DIA',
-            track: 3000,
             etc: {
                 recording: {
                     studio: 'ACME Water Tower',
@@ -22,7 +53,6 @@ let jsonData = {
         {
             title: 'Aussie Boy',
             artist: 'UNE',
-            track: 1,
             etc: {
                 recording: {
                     studio: 'Ayers Rock',
@@ -30,37 +60,22 @@ let jsonData = {
                     credit: ['Marceline', 'Finn', 'Jake']
                 }
             }
-        },
-        {
-            title: 'Shin Takara Jima',
-            artist: 'Sankanaction',
-            track: 1,
-            etc: {
-                recording: {
-                    studio: 'Turtle Power',
-                    address: 'New York, Brooklyn',
-                    credit: ['April', 'Splinter', 'Shredder', 'Rock Steady']
-                }
-            }
-        },
+        }
     ]
 };
-
+console.log('search "Steven Spielberg", and replace it with "Bong Joon Ho"');
 console.log(jsonCrawler(jsonData, "Steven Spielberg", {
     replace: 'Bong Joon Ho'
 }));
 
+console.log('search "Jake" and replace it to a new object {arrangers: [\'PRINCESS BUBBLE GUM\', \'FLAME PRINCESS\']');
+console.log('search "DIA" and replace it to "Baksa Gimm"');
 console.log(jsonCrawler(jsonData, ["Jake", 'DIA'], {
     filter: 'singer',
     replace: [{arrangers: ['PRINCESS BUBBLE GUM', 'FLAME PRINCESS']}, 'Baksa Gimm'],
 }));
 
 console.log(JSON.stringify(jsonData, null, 2));
-
-console.log('-');
-console.log('-');
-console.log('-');
-console.log('-');
 
 let distro = ['Linux', {
     distro: [['Red Hat Enterprise Linux', 'Fedora', ['Debian', {
@@ -70,6 +85,7 @@ let distro = ['Linux', {
     }]]]
 }, ['Manjaro', 'Arch Linux', 'Linux']];
 
+console.log('search "Linux" and replace it to "Baksa Gimm"');
 console.log(jsonCrawler(distro, "Linux", {
     filter: 'sub',
     replace: 'Mint'

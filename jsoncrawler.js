@@ -11,18 +11,22 @@
  * @module jsonCrawler
  * @param {(Object | Array)} json - JSON Object | Array to search
  * @param {(number | string | Array<number | string>)} search - Value to search in JSON Object.
- * @param {Object} option - Search option
+ * @param {Object} [option] - Search option
  * @param {(any | any[])} option.replace - Value to replace the original JSON Object. Searched values will be replaced by given parameters. If Array is given, corresponding array index of search parameter will be replaced.
  * @param {(number | string)} option.filter - Key names to exclude. Search will ignore any matching key names of the JSON Object.
  * @returns {searchResult}
  */
 function jsonCrawler(json, search, option) {
-    let {replace, filter = []} = option;
+    let {replace, filter = []} = option || {};
 
-    if (!search || !(Array.isArray(search) || typeof search === 'number' || typeof search === 'string'))
+    if (!search)
         throw 'search: invalid argument';
 
     search = Array.isArray(search) ? search : [search];
+
+    for (let s of search)
+        if (!(typeof s === 'string' || typeof s === 'number' || typeof s === 'boolean'))
+            throw 'search: invalid argument';
 
     if (replace !== undefined && !Array.isArray(replace))
         replace = [replace];
