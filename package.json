@@ -1,6 +1,6 @@
 {
   "name": "jsoncrawler",
-  "version": "0.1.12",
+  "version": "0.1.70",
   "description": "jsoncrawler.js lets you search complex json data",
   "main": "jsoncrawler.js",
   "scripts": {
