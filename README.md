@@ -7,7 +7,7 @@
 ## Getting started
 Add script tag in your header
 ```
-<script src="https://broadwayinc.dev/jslib/jsoncrawler/0.1.12/jsoncrawler.js"></script>
+<script src="https://broadwayinc.dev/jslib/jsoncrawler/0.1.13/jsoncrawler.js"></script>
 ```
 <br />
 
