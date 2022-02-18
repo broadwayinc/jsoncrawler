@@ -64,6 +64,8 @@ result returns:
     value: 'Come On Down'
   }
 ]
+
+Note: search results does not come in order.
 */
 
 // to get to the searched data:
@@ -99,7 +101,8 @@ You can replace the value easily
 let replace = ['Linux', 'Ubuntu', ['Mint', {mini: ['Lubuntu', 'linux']}]];
 
 // replace 'Lubuntu' with 'Xubuntu' and 'Linux' with 'Linus'
- 
+// Make sure the search array and replace array values are in the same order.
+
 jsonCrawler(replace, ['Lubuntu', 'Linux'], {
     replace: ['Xubuntu', 'Linus']
 });
