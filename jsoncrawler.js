@@ -17,7 +17,7 @@
  * @returns {searchResult}
  */
 function jsonCrawler(json, search, option) {
-    let {replace, filter = []} = option || {};
+    let { replace, filter = [] } = option || {};
 
     if (!search)
         throw 'search: invalid argument';
@@ -110,7 +110,7 @@ function jsonCrawler(json, search, option) {
 
         if (dataType === 'value') {
             // exit
-            callback({node: [], value: o, dataKey: null, siblings: []});
+            callback({ node: [], value: o, dataKey: null, siblings: [] });
             return;
         }
 
@@ -125,8 +125,8 @@ function jsonCrawler(json, search, option) {
                 continue;
 
             if (_dataType(_map.value) === 'value' && !filter.includes(_map.dataKey)) {
-                let {node, value, dataKey, siblings} = _map;
-                callback({node, value, dataKey, siblings});
+                let { node, value, dataKey, siblings } = _map;
+                callback({ node, value, dataKey, siblings });
                 continue;
             }
 
@@ -169,4 +169,4 @@ function jsonCrawler(json, search, option) {
     return found;
 }
 
-export {jsonCrawler};
+module.exports = { jsonCrawler };
