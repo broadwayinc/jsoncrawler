@@ -16,7 +16,7 @@ npm i jsoncrawler
 ```
 And in your javascript:
 ```
-import {jsonCrawler} from 'jsoncrawler';
+import jsonCrawler from 'jsoncrawler';
 ```
 <br />
 
