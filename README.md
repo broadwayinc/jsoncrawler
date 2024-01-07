@@ -25,7 +25,7 @@ import jsonCrawler from 'jsoncrawler';
 ```
 function jsonCrawler(
     object_to_search: {[key:string]: any} | any[],
-    value_to_search, number | string | boolean,
+    value_to_search, Array<number | string | boolean>,
     options: {
         replace: any[],
         filter: string[]
