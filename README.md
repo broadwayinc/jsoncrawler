@@ -37,9 +37,6 @@ function jsonCrawler(
     }[]
 ```
 
-#### jsonCrawler(object_to_search: object | array, value_to_search: number | string | boolean, <object: options>)
-
-
 ### Searching value
 Search and locate value inside complex json object
 
