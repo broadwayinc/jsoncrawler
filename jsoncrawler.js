@@ -1,21 +1,3 @@
-/**
- * @typedef {Object[]} searchResult
- * @property {(string | number)} result[].path - Value path in JSON Object
- * @property {(string | number)} result[].key - Key name of the result
- * @property {(string | number)} result[].siblings - Key names of the siblings
- * @property {(string | number)} result[].value - Value of the searched result
- */
-
-/**
- * jsonCrawler is a simple module for searching complex JSON objects.
- * @module jsonCrawler
- * @param {(Object | Array)} json - JSON Object | Array to search
- * @param {(number | string | Array<number | string>)} search - Value to search in JSON Object.
- * @param {Object} [option] - Search option
- * @param {(any | any[])} option.replace - Value to replace the original JSON Object. Searched values will be replaced by given parameters. If Array is given, corresponding array index of search parameter will be replaced.
- * @param {(number | string)} option.filter - Key names to exclude. Search will ignore any matching key names of the JSON Object.
- * @returns {searchResult}
- */
 function jsonCrawler(json, search, option) {
     let { replace, filter = [] } = option || {};
 
@@ -115,8 +97,8 @@ function jsonCrawler(json, search, option) {
         }
 
         // loop through object keys
-        for (let key in o) {
-            key = dataType === 'array' ? Number(key) : key;
+        for (let k in o) {
+            let key = dataType === 'array' ? Number(k) : k;
 
             // map is passed from _jsonCrawler argument. undefined at first run.
             let _map = setMap(key, o, map);
@@ -167,6 +149,22 @@ function jsonCrawler(json, search, option) {
     }
 
     return found;
-}
+};
 
-module.exports = { jsonCrawler };
+(function (root, factory) {
+    if (typeof define === 'function' && define.amd) {
+        // AMD. Register as an anonymous module.
+        define([], factory);
+    } else if (typeof exports === 'object') {
+        // Node. Does not work with strict CommonJS, but
+        // only CommonJS-like environments that support module.exports,
+        // like Node.
+        module.exports = factory();
+    } else {
+        // Browser globals (root is window)
+        root.jsonCrawler = factory();
+    }
+}(this, function () {
+    // Your function here
+    return jsonCrawler;
+}));

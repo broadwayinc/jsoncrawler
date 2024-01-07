@@ -1,4 +1,4 @@
-import { jsonCrawler } from './jsoncrawler.js';
+const jsonCrawler = require('./jsoncrawler.js');
 
 let jsonData = {
     singer: {
@@ -38,7 +38,7 @@ console.log(jsonCrawler(jsonData, "Steven Spielberg", {
 console.log('\x1b[32m%s\x1b[0m', JSON.stringify(jsonData, null, 2));
 
 console.log('\x1b[33m%s\x1b[0m', 'search "Jake" and replace it to a new object {arrangers: [\'PRINCESS BUBBLE GUM\', \'FLAME PRINCESS\']');
-console.log('\x1b[33m%s\x1b[0m', 'search "DIA" and replace it to "Baksa Gimm"');
+console.log('\x1b[33m%s\x1b[0m', 'search "DIA" and replace it to "Baksa Gimm" but expect the data inside "singer"');
 console.log(jsonCrawler(jsonData, ["Jake", 'DIA'], {
     filter: 'singer',
     replace: [{ arrangers: ['PRINCESS BUBBLE GUM', 'FLAME PRINCESS'] }, 'Baksa Gimm'],
@@ -54,7 +54,7 @@ let distro = ['Linux', {
 }, ['Manjaro', 'Arch Linux', 'Linux']];
 
 console.log(JSON.stringify(distro, null, 2))
-console.log('\x1b[33m%s\x1b[0m', 'search "Linux" and replace it to "Baksa Gimm"');
+console.log('\x1b[33m%s\x1b[0m', 'search "Linux" and replace it to "Mint" except the data nested in "sub"');
 console.log(jsonCrawler(distro, "Linux", {
     filter: 'sub',
     replace: 'Mint'

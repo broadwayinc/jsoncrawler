@@ -1,5 +1,4 @@
 # jsoncrawler
-<img alt="APM" src="https://img.shields.io/apm/l/vim-mode">
 
 **jsoncrawler** is a simple module that search/replace data inside complex javascript objects
 <br />
