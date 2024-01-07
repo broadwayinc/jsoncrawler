@@ -1,24 +1,25 @@
 # jsoncrawler
 
 **jsoncrawler** is a simple module that search/replace data inside complex javascript objects
-<br />
 
 ## Getting started
 Add script tag in your header
+
 ```
 <script src="https://cdn.jsdelivr.net/npm/jsoncrawler@latest/dist/jsoncrawler.js"></script>
 ```
-<br />
 
 Or on node.js or webpack based projects:
+
 ```
 npm i jsoncrawler
 ```
+
 And in your javascript:
+
 ```
 import jsonCrawler from 'jsoncrawler';
 ```
-<br />
 
 ## Basic usage
 
@@ -100,8 +101,6 @@ result[0].path.map(p => {
 DIA = DIA[result[0].key];
 
 ```
-
-<br />
 
 ### Replacing value
 You can replace the value easily
