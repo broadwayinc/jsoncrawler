@@ -22,7 +22,22 @@ import jsonCrawler from 'jsoncrawler';
 
 ## Basic usage
 
-#### jsonCrawler(<object | array: object to search>, <number | string | boolean: value to search>, <object: options>)
+```
+function jsonCrawler(
+    object_to_search: {[key:string]: any} | any[],
+    value_to_search, number | string | boolean,
+    options: {
+        replace: any[],
+        filter: string[]
+    }): {
+        path: any[], // nested key path in order to the data location
+        key: string, // key name of the parent value
+        siblings: string[], // key names that are present on the same level
+        value: any // value you have searched
+    }[]
+```
+
+#### jsonCrawler(object_to_search: object | array, value_to_search: number | string | boolean, <object: options>)
 
 
 ### Searching value
