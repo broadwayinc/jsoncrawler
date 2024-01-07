@@ -6,7 +6,7 @@
 Add script tag in your header
 
 ```
-<script src="https://cdn.jsdelivr.net/npm/jsoncrawler@latest/dist/jsoncrawler.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsoncrawler@latest/jsoncrawler.js"></script>
 ```
 
 Or on node.js or webpack based projects:
