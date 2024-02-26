@@ -1,17 +1,19 @@
 function jsonCrawler(json, search, option) {
     let { replace, filter = [] } = option || {};
 
-    if (!search)
-        throw 'search: invalid argument';
-
-    search = Array.isArray(search) ? search : [search];
+    search = Array.isArray(search) ? search : search !== undefined ? [search] : [];
 
     for (let s of search)
-        if (!(typeof s === 'string' || typeof s === 'number' || typeof s === 'boolean'))
+        if (!(typeof s === 'string' || typeof s === 'number' || typeof s === 'boolean' || s === null))
             throw 'search: invalid argument';
 
-    if (replace !== undefined && !Array.isArray(replace))
+    if (replace !== undefined && !Array.isArray(replace)) {
         replace = [replace];
+
+        for (let r of replace)
+            if (!(typeof r === 'string' || typeof r === 'number' || typeof r === 'boolean' || r === null))
+                throw 'replace: invalid argument';
+    }
 
     if (typeof filter === 'string' || typeof filter === 'number')
         filter = [filter];
@@ -23,7 +25,7 @@ function jsonCrawler(json, search, option) {
 
     let _jsonCrawler = (o, callback, map) => {
         let _dataType = (v) => {
-            return Array.isArray(v) && v.length ? 'array' : (v && typeof v === 'object' && Object.keys(v).length) ? 'object' : 'value';
+            return Array.isArray(v) && v.length ? 'array' : (typeof v) === 'object' && v !== null ? 'object' : 'value';
         };
 
         let setMap = (key, o, map = {
@@ -118,8 +120,8 @@ function jsonCrawler(json, search, option) {
     };
 
     _jsonCrawler(json, (m) => {
-        for (let f of search) {
-            if (!filter.includes(m.dataKey) && m.value === f) {
+        if (search.length === 0) {
+            if (!filter.includes(m.dataKey) && typeof m.value === 'string' || typeof m.value === 'number' || typeof m.value === 'boolean' || m.value === null || m.value === undefined) {
                 let node = JSON.parse(JSON.stringify(m));
                 found.push({
                     path: node.node,
@@ -132,6 +134,22 @@ function jsonCrawler(json, search, option) {
                 });
             }
         }
+
+        else
+            for (let f of search) {
+                if (!filter.includes(m.dataKey) && m.value === f) {
+                    let node = JSON.parse(JSON.stringify(m));
+                    found.push({
+                        path: node.node,
+                        key: node.dataKey,
+                        siblings: (() => {
+                            node.siblings.splice(node.siblings.indexOf(node.dataKey), 1);
+                            return node.siblings;
+                        })(),
+                        value: node.value
+                    });
+                }
+            }
     });
 
     if (replace) {

@@ -5,7 +5,7 @@
 ## Getting started
 Add script tag in your header
 
-```
+```html
 <script src="https://cdn.jsdelivr.net/npm/jsoncrawler@latest/jsoncrawler.js"></script>
 ```
 
@@ -21,29 +21,61 @@ And in your javascript:
 import jsonCrawler from 'jsoncrawler';
 ```
 
-## Basic usage
+## Parameters
 
-```
+``` ts
 function jsonCrawler(
     object_to_search: {[key:string]: any} | any[],
-    value_to_search, Array<number | string | boolean>,
+    value_to_search: Array<number | string | boolean>,
     options: {
-        replace: any[],
-        filter: string[]
+        replace: Array<number | string | boolean>, // Value to replace. Must be in the same order as the search array.
+        filter: Array<number | string> // Key names or index numbers to exclude from search/replacement
     }): {
-        path: any[], // nested key path in order to the data location
-        key: string, // key name of the parent value
-        siblings: string[], // key names that are present on the same level
-        value: any // value you have searched
+        path: Array<number | string>, // Nested key path in order to the parent location
+        key: string | number, // Key names or index number of the parent value
+        siblings: Array<number | string>, // Key names or index numbers of the siblings that are present on the same level
+        value: number | string | boolean // Value you have searched
     }[]
 ```
 
-### Searching value
+## Full scan
+You can scan the whole object and get the key path, key name, siblings and value
+
+**_Example_**
+```js
+let obj = {
+    artist: "DIA",
+    tracks: [
+        "Paradise",
+        {
+            hidden: "Come On Down"
+        }
+    ]
+}
+
+let result = jsonCrawler(obj);
+
+/*
+result returns:
+[
+  { path: [], key: 'artist', siblings: [ 'tracks' ], value: 'DIA' },
+  { path: [ 'tracks' ], key: 0, siblings: [ 1 ], value: 'Paradise' },
+  {
+    path: [ 'tracks', 1 ],
+    key: 'hidden',
+    siblings: [],
+    value: 'Come On Down'
+  }
+]
+*/
+```
+
+## Searching value
 Search and locate value inside complex json object
 
 **_Example_**
 
-```
+``` js
 // Let's find value "DIA" and "Come On Down"
 
 let obj = {
@@ -84,30 +116,28 @@ Note: search results does not come in order.
 
 let ComeOnDown = obj;
 
-result[1].path.map(p => {
-
+result[1].path.forEach(p => {
     // dive in to the key path
     ComeOnDown = ComeOnDown[p];
-    
 });
 
 // your value is in the key
 ComeOnDown = ComeOnDown[result[1].key];
 
 let DIA = obj;
-result[0].path.map(p => {
+result[0].path.forEach(p => {
     DIA = DIA[p];
 });
 DIA = DIA[result[0].key];
 
 ```
 
-### Replacing value
+## Replacing value
 You can replace the value easily
 
 **_Example_**
 
-```
+```js
 let replace = ['Linux', 'Ubuntu', ['Mint', {mini: ['Lubuntu', 'linux']}]];
 
 // replace 'Lubuntu' with 'Xubuntu' and 'Linux' with 'Linus'
@@ -117,17 +147,16 @@ jsonCrawler(replace, ['Lubuntu', 'Linux'], {
     replace: ['Xubuntu', 'Linus']
 });
 
-console.log(JSON.stringify(replace));
+console.log(replace);
 // returns ["Linus","Ubuntu",["Mint",{"mini":["Xubuntu","linux"]}]]
-
 ```
 
 ## Filtering keys
-You can exclude your search/replacement in certain key names
+You can exclude your search/replacement in certain key names or index numbers
 
 **_Example_**
 
-```
+```js
 let replace = ['Linux', 'Ubuntu', ['Mint', {mini: ['Lubuntu', 'linux']}]];
 
 // replace 'Lubuntu' with 'Xubuntu' and 'Linux' with 'Linus'
@@ -138,7 +167,7 @@ jsonCrawler(replace, ['Lubuntu', 'Linux'], {
     filter: ['mini']
 });
 
-console.log(JSON.stringify(replace));
+console.log(replace);
 // returns ["Linus","Ubuntu",["Mint",{"mini":["Lubuntu","linux"]}]]
 
 ```
