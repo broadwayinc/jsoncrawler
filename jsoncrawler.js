@@ -25,7 +25,7 @@ function jsonCrawler(json, search, option) {
 
     let _jsonCrawler = (o, callback, map) => {
         let _dataType = (v) => {
-            return Array.isArray(v) && v.length ? 'array' : (typeof v) === 'object' && v !== null ? 'object' : 'value';
+            return Array.isArray(v) && v.length ? 'array' : (typeof v) === 'object' && v !== null && Object.keys(v).length ? 'object' : 'value';
         };
 
         let setMap = (key, o, map = {
@@ -76,7 +76,13 @@ function jsonCrawler(json, search, option) {
 
             if (valueType === 'object' || valueType === 'array') {
                 // for nested object. need to add node location
-                if (!filter.includes(key)) {
+                if(valueType === 'array' && map.value.length === 0) {
+                    map.dataKey = key;
+                }
+                else if(valueType === 'object' && Object.keys(value).length === 0) {
+                    map.dataKey = key;
+                }
+                else if (!filter.includes(key)) {
                     map.node.push(key);
 
                     // push checkpoint key
@@ -115,13 +121,12 @@ function jsonCrawler(json, search, option) {
             }
 
             _jsonCrawler(_map.value, callback, _map);
-
         }
     };
 
     _jsonCrawler(json, (m) => {
         if (search.length === 0) {
-            if (!filter.includes(m.dataKey) && typeof m.value === 'string' || typeof m.value === 'number' || typeof m.value === 'boolean' || m.value === null || m.value === undefined) {
+            if (!filter.includes(m.dataKey)) {
                 let node = JSON.parse(JSON.stringify(m));
                 found.push({
                     path: node.node,
