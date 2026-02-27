@@ -1,173 +1,148 @@
 # jsoncrawler
 
-**jsoncrawler** is a simple module that search/replace data inside complex javascript objects
+`jsoncrawler` searches and optionally replaces values in nested JavaScript objects/arrays.
 
-## Getting started
-Add script tag in your header
+It returns match metadata so you can locate each value:
+- `path`: parent path to the value
+- `key`: key/index of the value on that parent
+- `siblings`: keys/indexes on the same level (excluding current key)
+- `value`: matched value
+
+## Install
+
+Browser:
 
 ```html
 <script src="https://cdn.jsdelivr.net/npm/jsoncrawler@latest/jsoncrawler.js"></script>
 ```
 
-Or on node.js or webpack based projects:
+Node:
 
-```
+```bash
 npm i jsoncrawler
 ```
 
-And in your javascript:
+## Import / Usage
 
+### Node.js (CommonJS)
+
+```js
+const jsonCrawler = require('jsoncrawler');
 ```
+
+### Node.js (ESM)
+
+```js
 import jsonCrawler from 'jsoncrawler';
 ```
 
-## Parameters
+If your runtime/bundler resolves CommonJS default exports differently, use:
 
-``` ts
+```js
+import pkg from 'jsoncrawler';
+const jsonCrawler = pkg.default || pkg;
+```
+
+### Browser global (from script tag)
+
+```html
+<script src="https://cdn.jsdelivr.net/npm/jsoncrawler@latest/jsoncrawler.js"></script>
+<script>
+    const result = jsonCrawler({ a: 1, b: 'x' }, 'x');
+    console.log(result);
+</script>
+```
+
+## API
+
+```ts
 function jsonCrawler(
-    object_to_search: {[key:string]: any} | any[],
-    value_to_search: Array<number | string | boolean>,
-    options: {
-        replace: Array<number | string | boolean>, // Value to replace. Must be in the same order as the search array.
-        filter: Array<number | string> // Key names or index numbers to exclude from search/replacement
-    }): {
-        path: Array<number | string>, // Nested key path in order to the parent location
-        key: string | number, // Key names or index number of the parent value
-        siblings: Array<number | string>, // Key names or index numbers of the siblings that are present on the same level
-        value: number | string | boolean // Value you have searched
-    }[]
+    data: { [key: string]: any } | any[] | string,
+    search?: Array<string | number | boolean | null> | string | number | boolean | null,
+    option?: {
+        replace?: any[] | any,
+        filter?: Array<string | number> | string | number
+    }
+): Array<{
+    path: Array<string | number>,
+    key: string | number,
+    siblings: Array<string | number>,
+    value: any
+}>;
 ```
 
-## Full scan
-You can scan the whole object and get the key path, key name, siblings and value
+### Input behavior
 
-**_Example_**
-```js
-let obj = {
-    artist: "DIA",
-    tracks: [
-        "Paradise",
-        {
-            hidden: "Come On Down"
-        }
-    ]
-}
+- `data` can be:
+    - object/array (normal traversal), or
+    - JSON string (parsed once with `JSON.parse` before traversal).
+- Invalid JSON string throws: `Error('json: invalid JSON string')`.
+- `search` can be single value or array. If omitted, crawler performs full scan.
+- `filter` can be single key/index or array.
 
-let result = jsonCrawler(obj);
+## Quick examples
 
-/*
-result returns:
-[
-  { path: [], key: 'artist', siblings: [ 'tracks' ], value: 'DIA' },
-  { path: [ 'tracks' ], key: 0, siblings: [ 1 ], value: 'Paradise' },
-  {
-    path: [ 'tracks', 1 ],
-    key: 'hidden',
-    siblings: [],
-    value: 'Come On Down'
-  }
-]
-*/
-```
-
-## Searching value
-Search and locate value inside complex json object
-
-**_Example_**
-
-``` js
-// Let's find value "DIA" and "Come On Down"
-
-let obj = {
-    artist: "DIA",
-    tracks: [
-        "Paradise",
-        {
-            hidden: "Come On Down"
-        }
-    ]
-}
-
-let result = jsonCrawler(obj, ["Come On Down", "DIA"]);
-
-/*
-result returns:
-[
-  { path: [], key: 'artist', siblings: [ 'tracks' ], value: 'DIA' },
-  {
-    // 'path' is the key path to the data location:
-    path: [ 'tracks', 1 ],
-    
-    // 'key' is the key name of the value
-    key: 'hidden',
-    
-    // 'siblings' is the key names that are present on the same level
-    siblings: [],
-    
-    // 'value' is the value you have searched
-    value: 'Come On Down'
-  }
-]
-
-Note: search results does not come in order.
-*/
-
-// to get to the searched data:
-
-let ComeOnDown = obj;
-
-result[1].path.forEach(p => {
-    // dive in to the key path
-    ComeOnDown = ComeOnDown[p];
-});
-
-// your value is in the key
-ComeOnDown = ComeOnDown[result[1].key];
-
-let DIA = obj;
-result[0].path.forEach(p => {
-    DIA = DIA[p];
-});
-DIA = DIA[result[0].key];
-
-```
-
-## Replacing value
-You can replace the value easily
-
-**_Example_**
+### 1) Full scan (no search)
 
 ```js
-let replace = ['Linux', 'Ubuntu', ['Mint', {mini: ['Lubuntu', 'linux']}]];
+const obj = {
+    artist: 'DIA',
+    tracks: ['Paradise', { hidden: 'Come On Down' }]
+};
 
-// replace 'Lubuntu' with 'Xubuntu' and 'Linux' with 'Linus'
-// Make sure the search array and replace array values are in the same order.
+const result = jsonCrawler(obj);
+console.log(result);
+```
 
-jsonCrawler(replace, ['Lubuntu', 'Linux'], {
+### 2) Search values
+
+```js
+const result = jsonCrawler(obj, ['Come On Down', 'DIA']);
+console.log(result);
+```
+
+### 3) Replace values (in-place for object/array input)
+
+```js
+const data = ['Linux', 'Ubuntu', ['Mint', { mini: ['Lubuntu', 'linux'] }]];
+
+jsonCrawler(data, ['Lubuntu', 'Linux'], {
     replace: ['Xubuntu', 'Linus']
 });
 
-console.log(replace);
-// returns ["Linus","Ubuntu",["Mint",{"mini":["Xubuntu","linux"]}]]
+console.log(data);
+// ["Linus","Ubuntu",["Mint",{"mini":["Xubuntu","linux"]}]]
 ```
 
-## Filtering keys
-You can exclude your search/replacement in certain key names or index numbers
-
-**_Example_**
+### 4) Filter keys/indexes
 
 ```js
-let replace = ['Linux', 'Ubuntu', ['Mint', {mini: ['Lubuntu', 'linux']}]];
-
-// replace 'Lubuntu' with 'Xubuntu' and 'Linux' with 'Linus'
-// but exclude data inside keyname 'mini'
- 
-jsonCrawler(replace, ['Lubuntu', 'Linux'], {
+jsonCrawler(data, ['Lubuntu', 'Linux'], {
     replace: ['Xubuntu', 'Linus'],
     filter: ['mini']
 });
-
-console.log(replace);
-// returns ["Linus","Ubuntu",["Mint",{"mini":["Lubuntu","linux"]}]]
-
 ```
+
+### 5) JSON string input
+
+```js
+const source = '{"a":1,"b":{"c":"x"},"arr":["x",2]}';
+const found = jsonCrawler(source, 'x');
+console.log(found);
+```
+
+## Notes from current implementation
+
+- Traversal is recursive and visits own enumerable keys.
+- Circular references are safely skipped (no infinite recursion).
+- `NaN` search is supported when input is a JS object/array.
+- If `replace` is provided, replacements are mapped by search index order.
+- For JSON string input, replacements apply to the parsed internal object; your original string is not mutated.
+
+## Demo reference
+
+See `demo.js` for complete examples of:
+- full scan,
+- targeted search,
+- in-place replacement (including object replacement),
+- key filtering.

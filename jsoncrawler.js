@@ -1,27 +1,60 @@
 function jsonCrawler(json, search, option) {
     let { replace, filter = [] } = option || {};
 
+    if (typeof json === 'string') {
+        try {
+            json = JSON.parse(json);
+        } catch (err) {
+            throw new Error('json: invalid JSON string');
+        }
+    }
+
+    let isAllowedValue = (value) => {
+        return typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean' || value === null;
+    };
+
+    let isAllowedReplaceValue = (value) => {
+        return value === undefined
+            || value === null
+            || typeof value === 'string'
+            || typeof value === 'number'
+            || typeof value === 'boolean'
+            || (typeof value === 'object');
+    };
+
+    let isSameValue = (left, right) => {
+        return left === right || (Number.isNaN(left) && Number.isNaN(right));
+    };
+
+    let isFilteredKey = (key, filterList) => {
+        return filterList.includes(key)
+            || (typeof key === 'number' && filterList.includes(String(key)))
+            || (typeof key === 'string' && /^\d+$/.test(key) && filterList.includes(Number(key)));
+    };
+
     search = Array.isArray(search) ? search : search !== undefined ? [search] : [];
 
     for (let s of search)
-        if (!(typeof s === 'string' || typeof s === 'number' || typeof s === 'boolean' || s === null))
-            throw 'search: invalid argument';
+        if (!isAllowedValue(s))
+            throw new Error('search: invalid argument');
 
-    if (replace !== undefined && !Array.isArray(replace)) {
+    if (replace !== undefined && !Array.isArray(replace))
         replace = [replace];
 
+    if (Array.isArray(replace))
         for (let r of replace)
-            if (!(typeof r === 'string' || typeof r === 'number' || typeof r === 'boolean' || r === null))
-                throw 'replace: invalid argument';
-    }
+            if (!isAllowedReplaceValue(r))
+                throw new Error('replace: invalid argument');
 
     if (typeof filter === 'string' || typeof filter === 'number')
         filter = [filter];
 
     if (!Array.isArray(filter))
-        throw 'filter: invalid argument';
+        throw new Error('filter: invalid argument');
 
     let found = [];
+    let foundSearchIndexes = [];
+    let visitedNodes = typeof WeakSet !== 'undefined' ? new WeakSet() : null;
 
     let _jsonCrawler = (o, callback, map) => {
         let _dataType = (v) => {
@@ -82,7 +115,7 @@ function jsonCrawler(json, search, option) {
                 else if(valueType === 'object' && Object.keys(value).length === 0) {
                     map.dataKey = key;
                 }
-                else if (!filter.includes(key)) {
+                else if (!isFilteredKey(key, filter)) {
                     map.node.push(key);
 
                     // push checkpoint key
@@ -98,6 +131,12 @@ function jsonCrawler(json, search, option) {
 
         let dataType = _dataType(o);
 
+        if ((dataType === 'array' || dataType === 'object') && visitedNodes) {
+            if (visitedNodes.has(o))
+                return;
+            visitedNodes.add(o);
+        }
+
         if (dataType === 'value') {
             // exit
             callback({ node: [], value: o, dataKey: null, siblings: [] });
@@ -105,16 +144,16 @@ function jsonCrawler(json, search, option) {
         }
 
         // loop through object keys
-        for (let k in o) {
+        for (let k of Object.keys(o)) {
             let key = dataType === 'array' ? Number(k) : k;
 
             // map is passed from _jsonCrawler argument. undefined at first run.
             let _map = setMap(key, o, map);
 
-            if (filter.includes(key))
+            if (isFilteredKey(key, filter))
                 continue;
 
-            if (_dataType(_map.value) === 'value' && !filter.includes(_map.dataKey)) {
+            if (_dataType(_map.value) === 'value' && !isFilteredKey(_map.dataKey, filter)) {
                 let { node, value, dataKey, siblings } = _map;
                 callback({ node, value, dataKey, siblings });
                 continue;
@@ -126,41 +165,51 @@ function jsonCrawler(json, search, option) {
 
     _jsonCrawler(json, (m) => {
         if (search.length === 0) {
-            if (!filter.includes(m.dataKey)) {
-                let node = JSON.parse(JSON.stringify(m));
+            if (!isFilteredKey(m.dataKey, filter)) {
+                let siblings = m.siblings.slice();
+                let keyIndex = siblings.indexOf(m.dataKey);
+
+                if (keyIndex !== -1)
+                    siblings.splice(keyIndex, 1);
+
                 found.push({
-                    path: node.node,
-                    key: node.dataKey,
-                    siblings: (() => {
-                        node.siblings.splice(node.siblings.indexOf(node.dataKey), 1);
-                        return node.siblings;
-                    })(),
-                    value: node.value
+                    path: m.node.slice(),
+                    key: m.dataKey,
+                    siblings,
+                    value: m.value
                 });
+                foundSearchIndexes.push(-1);
             }
         }
 
         else
-            for (let f of search) {
-                if (!filter.includes(m.dataKey) && m.value === f) {
-                    let node = JSON.parse(JSON.stringify(m));
+            for (let index = 0; index < search.length; index++) {
+                let f = search[index];
+
+                if (!isFilteredKey(m.dataKey, filter) && isSameValue(m.value, f)) {
+                    let siblings = m.siblings.slice();
+                    let keyIndex = siblings.indexOf(m.dataKey);
+
+                    if (keyIndex !== -1)
+                        siblings.splice(keyIndex, 1);
+
                     found.push({
-                        path: node.node,
-                        key: node.dataKey,
-                        siblings: (() => {
-                            node.siblings.splice(node.siblings.indexOf(node.dataKey), 1);
-                            return node.siblings;
-                        })(),
-                        value: node.value
+                        path: m.node.slice(),
+                        key: m.dataKey,
+                        siblings,
+                        value: m.value
                     });
+                    foundSearchIndexes.push(index);
                 }
             }
     });
 
     if (replace) {
-        for (const f of found) {
+        for (let i = 0; i < found.length; i++) {
+            let f = found[i];
             let j = json;
-            let index = search.indexOf(f.value);
+            let index = foundSearchIndexes[i];
+
             if (replace[index] !== undefined) {
                 for (let idx = 0; f.path.length > idx; idx++)
                     // goto path
