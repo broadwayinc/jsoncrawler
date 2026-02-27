@@ -36,13 +36,6 @@ const jsonCrawler = require('jsoncrawler');
 import jsonCrawler from 'jsoncrawler';
 ```
 
-If your runtime/bundler resolves CommonJS default exports differently, use:
-
-```js
-import pkg from 'jsoncrawler';
-const jsonCrawler = pkg.default || pkg;
-```
-
 ### Browser global (from script tag)
 
 ```html

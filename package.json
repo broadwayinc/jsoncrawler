@@ -3,6 +3,13 @@
   "version": "1.0.0",
   "description": "jsoncrawler.js lets you search complex json data",
   "main": "jsoncrawler.js",
+  "exports": {
+    ".": {
+      "require": "./jsoncrawler.js",
+      "import": "./jsoncrawler.js",
+      "default": "./jsoncrawler.js"
+    }
+  },
   "scripts": {
     "test": "node test.js"
   },
